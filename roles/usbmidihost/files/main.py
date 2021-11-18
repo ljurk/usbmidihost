@@ -36,7 +36,7 @@
 
 import re
 import subprocess
-from lib import display
+import display
 def getDeviceList():
     command = 'aconnect -i -l'
     result = subprocess.run(command.split(' '), stdout=subprocess.PIPE)
