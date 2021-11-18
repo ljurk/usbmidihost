@@ -1,0 +1,3 @@
+---
+usbmidihost_installDir: /opt/usbmidihost/
+usbmidihost_ExecStart: /opt/usbmidihost/main.py

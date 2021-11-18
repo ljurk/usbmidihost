@@ -1,0 +1,8 @@
+[Unit]
+Description=Initial USB MIDI connect
+
+[Service]
+ExecStart={{ usbmidihost_ExecStart }}
+
+[Install]
+WantedBy=multi-user.target

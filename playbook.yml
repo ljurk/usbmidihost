@@ -1,0 +1,4 @@
+---
+- hosts: rpi
+  roles:
+    - usbmidihost

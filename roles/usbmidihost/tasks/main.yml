@@ -1,0 +1,37 @@
+---
+- name: install packages
+  become: true
+  package:
+    name: "{{ packages }}"
+    state: present
+  vars:
+    packages:
+      # tools
+      - python3-smbus
+
+- name: Get I2C status
+  shell: "raspi-config nonint get_i2c"
+  register: i2c_status
+  changed_when: False
+
+- name: Enable I2C
+  become: true
+  shell: "raspi-config nonint do_i2c 0"
+  when: (i2c_status.stdout != '0')
+
+- name: Create a directory if it does not exist
+  become: true
+  ansible.builtin.file:
+    path: "{{ usbmidihost_installDir }}"
+    state: directory
+    mode: '0755'
+
+- name: copy files to dir
+  become: true
+  copy:
+    src: "{{ item }}"
+    dest: "{{ usbmidihost_installDir }}"
+    owner: root
+    mode: 644
+  with_fileglob:
+    - "{{ role_path }}/files/*"
