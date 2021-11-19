@@ -1,4 +1,4 @@
-#
+#!/usr/bin/python
 ## unconnect everything
 #system "aconnect -x"
 #
@@ -50,7 +50,17 @@ def getDeviceList():
             deviceDict.append({'id': match.group(1), 'name': match.group(2)})
     return deviceDict
 
+
+def getIp():
+    import socket
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(('8.8.8.8', 1))  # connect() for UDP doesn't send packets
+    return s.getsockname()[0]
+
+
 display = display.Display()
 print(getDeviceList())
+display.lcd_string(f"IP:{getIp()}", 0)
 for dev in getDeviceList():
-    display.lcd_string(dev['id'] + ':' + dev['name'], 0)
+    display.lcd_string(dev['id'] + ':' + dev['name'], 1)
