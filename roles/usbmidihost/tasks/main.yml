@@ -32,6 +32,22 @@
     src: "{{ item }}"
     dest: "{{ usbmidihost_installDir }}"
     owner: root
-    mode: 644
+    mode: 755
   with_fileglob:
     - "{{ role_path }}/files/*"
+
+- name: copy service file
+  become: true
+  template:
+    src: usbmidihost.service.j2
+    dest: /lib/systemd/system/usbmidihost.service
+    mode: 644
+  notify:
+    - reload systemctl
+
+- name: start and enable service
+  become: true
+  service:
+    name: usbmidihost.service
+    state: started
+    enabled: yes
