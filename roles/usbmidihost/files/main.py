@@ -1,42 +1,10 @@
 #!/usr/bin/python
-## unconnect everything
-#system "aconnect -x"
-#
-#t = `aconnect -i -l`
-#ports = []
-#names = []
-#t.lines.each do |l|
-#  /client (\d*)\: '(.*)'/=~l
-#  port = $1
-#  name = $2
-#  # we skip empty lines and the "Through" port
-#  unless $1.nil? || $1 == '0' || /Through/=~l
-#    ports << port
-#    names << name
-#  end
-#end
-#
-#ports.each do |p1|
-#  ports.each do |p2|
-#    unless p1 == p2 # probably not a good idea to connect a port to itself
-#      system  "aconnect #{p1}:0 #{p2}:0"
-#    end
-#  end
-#end
-#
-#cmd = "/usr/local/bin/lcd-show.py"
-#if names.length>1 then
-#  command = "#{cmd} #{names.map(&:inspect).join(' ')} "
-#else
-#  command = "#{cmd} '' 'No MIDI' 'connections' "
-#end
-#
-#pid = spawn(command)
-#Process.detach(pid)
-
 import re
 import subprocess
 import display
+import socket
+
+
 def getDeviceList():
     command = 'aconnect -i -l'
     result = subprocess.run(command.split(' '), stdout=subprocess.PIPE)
@@ -52,11 +20,9 @@ def getDeviceList():
 
 
 def getIp():
-    import socket
-
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(('8.8.8.8', 1))  # connect() for UDP doesn't send packets
-    return s.getsockname()[0]
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.connect(('8.8.8.8', 1))  # connect() for UDP doesn't send packets
+    return sock.getsockname()[0]
 
 
 display = display.Display()
