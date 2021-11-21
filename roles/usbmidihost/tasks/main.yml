@@ -1,4 +1,38 @@
 ---
+
+# enable  SPI
+- name: Get SPI status
+  shell: "raspi-config nonint get_spi"
+  register: spi_status
+  changed_when: False
+
+- name: Print SPI status
+  debug:
+    msg: "SPI status is: {{ spi_status.stdout }}"
+
+- name: Enable SPI
+  become:  true
+  shell: "raspi-config nonint do_spi 0"
+  when: (spi_status.stdout != '0')
+
+#install requirements for display(https://www.waveshare.com/wiki/1.44inch_LCD_HAT#Run_the_demo)
+- name: download display driver
+  get_url:
+    url: https://www.airspayce.com/mikem/bcm2835/bcm2835-1.68.tar.gz
+    dest: /home/pi/
+
+- name: Extract archive
+  ansible.builtin.unarchive:
+    src: /home/pi/bcm2835-1.68.tar.gz
+    dest: /home/pi
+    remote_src: true
+
+- name: install display driver
+  become: true
+  shell:
+    cmd: "sudo ./configure && sudo make && sudo make check && sudo make install"
+    chdir: /home/pi/bcm2835-1.68
+
 - name: install packages
   become: true
   package:
@@ -6,18 +40,15 @@
     state: present
   vars:
     packages:
-      # tools
-      - python3-smbus
+      #- python3-smbus
+      - python3-rpi.gpio
+      - python3-spidev
+      - python3-numpy
+      - python3-psutil
+      - python3-pillow
+      - libatlas-base-dev
+      - libopenjp2-7
 
-- name: Get I2C status
-  shell: "raspi-config nonint get_i2c"
-  register: i2c_status
-  changed_when: False
-
-- name: Enable I2C
-  become: true
-  shell: "raspi-config nonint do_i2c 0"
-  when: (i2c_status.stdout != '0')
 
 - name: Create a directory if it does not exist
   become: true
