@@ -130,22 +130,21 @@ class usbMidiHostUi():
         if pin == KEY1_PIN:
             print("Key1")
             self.currentInfo = self.currentInfo + 1 if self.currentInfo < len(self.infos) - 1 else 0
-        # Key2: Connect Currently selected devices
+        # Key2: toggle connection between selected devices
         if pin == KEY2_PIN:
             print("Key2")
             if {'in': self.currentDeviceLeft, 'out': self.currentDeviceRight} in self.connectedDevices:
-                self.statusMessage("nothing to do")
+                # disconnect
+                self.connectedDevices.remove({'in': self.currentDeviceLeft, 'out': self.currentDeviceRight})
+                self.statusMessage(f"disconnected({self.currentDeviceLeft},{self.currentDeviceRight})")
             else:
+                # connect
                 self.connectedDevices.append({'in': self.currentDeviceLeft, 'out': self.currentDeviceRight})
                 self.statusMessage(f"connected({self.currentDeviceLeft},{self.currentDeviceRight})")
         # Key3: Disconnect Currently selected devices
         if pin == KEY3_PIN:
             print("Key2")
-            if {'in': self.currentDeviceLeft, 'out': self.currentDeviceRight} in self.connectedDevices:
-                self.connectedDevices.remove({'in': self.currentDeviceLeft, 'out': self.currentDeviceRight})
-                self.statusMessage(f"disconnected({self.currentDeviceLeft},{self.currentDeviceRight})")
-            else:
-                self.statusMessage("nothing to do")
+            self.statusMessage("no function yet")
 
     @staticmethod
     def midpoint(p1, p2):
@@ -164,6 +163,12 @@ class usbMidiHostUi():
         for i, dev in enumerate(self.usbMidiHost.getDeviceList()):
             self.draw.rectangle([(87, (i+1)*20), (127, (i+2)*20)], outline="red", fill=0)
             self.draw.text((87, (i+1)*20), dev['name'][0:6], font=font)
+
+        # draw collumn headings on bottom
+        self.draw.rectangle([(87, 115), (127, 127)], outline="white", fill=0)
+        self.draw.text((87, 115), 'input', font=font)
+        self.draw.rectangle([(0, 115), (40, 127)], outline="white", fill=0)
+        self.draw.text((0, 115), 'output', font=font)
 
     def drawInformations(self):
         if self.currentInfo != 0:
