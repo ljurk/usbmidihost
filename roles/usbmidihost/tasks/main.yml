@@ -73,12 +73,11 @@
     src: usbmidihost.service.j2
     dest: /lib/systemd/system/usbmidihost.service
     mode: 644
-  notify:
-    - reload systemctl
 
 - name: start and enable service
   become: true
   service:
     name: usbmidihost.service
+    daemon_reload: true
     state: started
     enabled: yes
