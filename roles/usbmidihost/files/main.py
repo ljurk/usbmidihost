@@ -113,9 +113,9 @@ class usbMidiHostUi():
         if pin == KEY_DOWN_PIN:
             print("up")
             if self.currentSide == LEFT:
-                self.currentDeviceLeft = self.decrease(self.currentDeviceLeft, len(self.usbMidiHost.getDeviceList()))
+                self.currentDeviceLeft = self.decrease(self.currentDeviceLeft, len(self.usbMidiHost.getDeviceList()) - 1)
             else:
-                self.currentDeviceRight = self.decrease(self.currentDeviceRight, len(self.usbMidiHost.getDeviceList()))
+                self.currentDeviceRight = self.decrease(self.currentDeviceRight, len(self.usbMidiHost.getDeviceList()) - 1)
         if pin == KEY_UP_PIN:
             print("down")
             if self.currentSide == LEFT:
