@@ -1,4 +1,5 @@
 ---
-- hosts: rpi
+- hosts: all
+  remote_user: pi
   roles:
     - usbmidihost
