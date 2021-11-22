@@ -2,7 +2,7 @@
 Description=Initial USB MIDI connect
 
 [Service]
-ExecStartPre=/bin/sleep 20
+ExecStartPre=/bin/sleep {{ usbmidihost_startupDelay }}
 ExecStart={{ usbmidihost_ExecStart }}
 
 [Install]
