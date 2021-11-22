@@ -81,7 +81,12 @@ class usbMidiHostUi():
 
     def __init__(self):
         self.usbMidiHost = usbMidiHost()
-        self.infos = [f"status", f"ip:{self.getIp()}", f"uptime:{self.get_uptime()}", f'cpu:{psutil.cpu_percent()}%', f'ram:{psutil.virtual_memory().percent}%', 'creator: lukn303']
+        self.infos = ['status',
+                      'ip:{self.getIp()}',
+                      'uptime:{self.get_uptime()}',
+                      'cpu:{psutil.cpu_percent()}%',
+                      'ram:{psutil.virtual_memory().percent}%',
+                      'creator: lukn303']
         # init GPIO
         GPIO.setmode(GPIO.BCM)
         for pin in self.pins:
@@ -170,11 +175,13 @@ class usbMidiHostUi():
         self.draw.rectangle([(0, 115), (40, 127)], outline="white", fill=0)
         self.draw.text((0, 115), 'output', font=font)
 
+    @staticmethod
+    def fstr(template):
+        return eval(f"f'{template}'")
+
     def drawInformations(self):
-        if self.currentInfo != 0:
-            self.infos = [f"status", f"ip:{self.getIp()}", f"uptime:{self.get_uptime()}", f'cpu:{psutil.cpu_percent()}%', f'ram:{psutil.virtual_memory().percent}%', 'creator: lukn303']
-        self.draw.rectangle([(0,0), (127, 15)], outline='red', fill=0)
-        self.draw.text((5, 0), self.infos[self.currentInfo], font=font)
+        self.draw.rectangle([(0, 0), (127, 15)], outline='red', fill=0)
+        self.draw.text((5, 0), self.fstr(self.infos[self.currentInfo]), font=font)
 
     @staticmethod
     def get_uptime():
