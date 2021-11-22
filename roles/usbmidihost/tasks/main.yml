@@ -1,4 +1,8 @@
 ---
+- name: set timezone
+  become: true
+  timezone:
+    name: Europe/Berlin
 
 # enable  SPI
 - name: Get SPI status

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import re
-from datetime import timedelta
+from datetime import timedelta, datetime
 import time
 import subprocess
 import socket
@@ -84,6 +84,7 @@ class usbMidiHostUi():
         self.infos = ['status',
                       'ip:{self.getIp()}',
                       'uptime:{self.get_uptime()}',
+                      'time:{datetime.now().strftime("%H:%M:%S")}',
                       'cpu:{psutil.cpu_percent()}%',
                       'ram:{psutil.virtual_memory().percent}%',
                       'creator: lukn303']
@@ -174,8 +175,7 @@ class usbMidiHostUi():
         self.draw.rectangle([(0, 115), (40, 127)], outline="white", fill=0)
         self.draw.text((0, 115), 'output', font=font)
 
-    @staticmethod
-    def fstr(template):
+    def fstr(self, template):
         return eval(f"f'{template}'")
 
     def drawInformations(self):
