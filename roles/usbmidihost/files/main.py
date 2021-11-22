@@ -97,8 +97,7 @@ class usbMidiHostUi():
 
         # 240x240 display with hardware SPI:
         self.disp = display.LCD()
-        Lcd_ScanDir = display.SCAN_DIR_DFT  # SCAN_DIR_DFT = D2U_L2R
-        self.disp.LCD_Init(Lcd_ScanDir)
+        self.disp.LCD_Init(display.SCAN_DIR_DFT)
         self.disp.LCD_Clear()
 
         # Create blank image for drawing.
