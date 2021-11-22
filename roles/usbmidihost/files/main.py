@@ -58,6 +58,19 @@ class usbMidiHost():
                 self.devices.append({'id': match.group(1), 'name': match.group(2)})
         return self.devices
 
+    def connect(self, midiOut, midiIn):
+        command = ['aconnect',
+                   f'{self.devices[midiOut]["name"]}:0',
+                   f'{self.devices[midiIn]["name"]}:0']
+        subprocess.run(command, stdout=subprocess.PIPE)
+
+    def disconnect(self, midiOut, midiIn):
+        command = ['aconnect',
+                   '-d',
+                   f'{self.devices[midiOut]["name"]}:0',
+                   f'{self.devices[midiIn]["name"]}:0']
+        subprocess.run(command, stdout=subprocess.PIPE)
+
 
 class usbMidiHostUi():
     buttons = [{'points': [(127, 20), (90, 40)], 'key': KEY1_PIN, 'text': 'in'},
@@ -138,12 +151,18 @@ class usbMidiHostUi():
         # Key2: toggle connection between selected devices
         if pin == KEY2_PIN:
             print("Key2")
+            if self.currentDeviceLeft == self.currentDeviceRight:
+                self.statusMessage("cannot connect to itself")
+                return
+
             if {'in': self.currentDeviceLeft, 'out': self.currentDeviceRight} in self.connectedDevices:
                 # disconnect
+                self.usbMidiHost.disconnect(self.currentDeviceLeft, self.currentDeviceRight)
                 self.connectedDevices.remove({'in': self.currentDeviceLeft, 'out': self.currentDeviceRight})
                 self.statusMessage(f"disconnected({self.currentDeviceLeft},{self.currentDeviceRight})")
             else:
                 # connect
+                self.usbMidiHost.connect(self.currentDeviceLeft, self.currentDeviceRight)
                 self.connectedDevices.append({'in': self.currentDeviceLeft, 'out': self.currentDeviceRight})
                 self.statusMessage(f"connected({self.currentDeviceLeft},{self.currentDeviceRight})")
         # Key3: Disconnect Currently selected devices
