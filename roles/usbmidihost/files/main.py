@@ -3,6 +3,7 @@
 import re
 from datetime import timedelta, datetime
 import time
+import random
 import subprocess
 import socket
 import math
@@ -38,13 +39,13 @@ class usbMidiHost():
         print(time.time() - self.currentTime)
         command = 'aconnect -i -l'
         result = subprocess.run(command.split(' '), stdout=subprocess.PIPE)
-        # create a list for each line in the command output and remove lines containing 'Through'
-        devices = [i for i in result.stdout.decode('utf-8').split('\n') if 'Through' not in i]
+        # create a list for each line in the command output
+        devices = result.stdout.decode('utf-8').split('\n')
         # find id and name for each device
         self.devices = []
         for dev in devices:
-            match = re.match("client (\d*)\: '(.*)'", dev)
-            if match:
+            match = re.match(r"client (\d*)\: '(.*)'", dev)
+            if match and match.group(2) not in ['Midi Through', 'System']:
                 self.devices.append({'id': match.group(1), 'name': match.group(2)})
         return self.devices
 
@@ -78,6 +79,12 @@ class usbMidiHostUi():
             '1': 21,
             '2': 20,
             '3': 16}
+    animationPos = (0, 0)
+    animationDirX = 2
+    animationDirY = 1
+    animationTextWidth = 25
+    animationTextHeigth = 10
+    animationColor = 'white'
 
     def __init__(self):
         self.usbMidiHost = usbMidiHost()
@@ -253,11 +260,34 @@ class usbMidiHostUi():
     def increase(num, maxNum):
         return num + 1 if num < maxNum - 1 else 0
 
+    def newAnimationColor(self):
+        self.animationColor = '#%02X%02X%02X' % (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+    def drawStandbyAnimation(self):
+        self.draw.text(self.animationPos, 'acid', font=font, fill=self.animationColor)
+        self.animationPos = (self.animationPos[0] + self.animationDirX, self.animationPos[1] + self.animationDirY)
+
+        if self.animationPos[0] <= 0:
+            self.newAnimationColor()
+            self.animationDirX = 2
+        if self.animationPos[1] <= 0:
+            self.newAnimationColor()
+            self.animationDirY = 1
+        if self.animationPos[0] >= 127 - self.animationTextWidth:
+            self.newAnimationColor()
+            self.animationDirX = -2
+        if self.animationPos[1] >= 127 - self.animationTextHeigth:
+            self.newAnimationColor()
+            self.animationDirY = -1
+
     def drawUi(self):
         self.draw.rectangle([(0, 0), (127, 127)], fill=0)
-        self.drawInformations()
-        self.drawDevices()
-        self.drawLines()
+        if len(self.usbMidiHost.getDeviceList()) == 0:
+            self.drawStandbyAnimation()
+        else:
+            self.drawInformations()
+            self.drawDevices()
+            self.drawLines()
         self.disp.LCD_ShowImage(self.image, 0, 0)
 
 
