@@ -25,10 +25,12 @@ font = ImageFont.truetype(fontpath, 10)
 
 class usbMidiHost():
     devices = []
+    length = 0
     currentTime = time.time()
     interval = 5
 
-    def __init__(self):
+    def __init__(self, onChange):
+        self.onChange = onChange
         pass
 
     def getDeviceList(self):
@@ -47,6 +49,9 @@ class usbMidiHost():
             match = re.match(r"client (\d*)\: '(.*)'", dev)
             if match and match.group(2) not in ['Midi Through', 'System']:
                 self.devices.append({'id': match.group(1), 'name': match.group(2)})
+        if len(self.devices) != self.length:
+            self.onChange()
+            self.length = len(self.devices)
         return self.devices
 
     def connect(self, midiOut, midiIn):
@@ -87,7 +92,7 @@ class usbMidiHostUi():
     animationColor = 'white'
 
     def __init__(self):
-        self.usbMidiHost = usbMidiHost()
+        self.usbMidiHost = usbMidiHost(self.onDeviceListChange)
         self.infos = ['status',
                       'ip:{self.getIp()}',
                       'uptime:{self.get_uptime()}',
@@ -120,6 +125,9 @@ class usbMidiHostUi():
         # Draw a black filled box to clear the image.
         self.draw.rectangle((0, 0, width, height), outline=0, fill=0)
         self.disp.LCD_ShowImage(self.image, 0, 0)
+    def onDeviceListChange(self):
+        self.statusMessage("deviceList changed")
+        print("device List changed")
 
     def pinHandler(self, pin):
         if pin == self.pins['down']:
@@ -284,6 +292,11 @@ class usbMidiHostUi():
         self.draw.rectangle([(0, 0), (127, 127)], fill=0)
         if len(self.usbMidiHost.getDeviceList()) == 0:
             self.drawStandbyAnimation()
+            # reset connections
+            self.currentDeviceLeft = 0
+            self.currentDeviceRight = 0
+            self.connectedDevices = []
+            self.currentSide = True
         else:
             self.drawInformations()
             self.drawDevices()
