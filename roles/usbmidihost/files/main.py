@@ -19,16 +19,6 @@ import LCD_Config
 fontpath = '/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf'
 font = ImageFont.truetype(fontpath, 10)
 
-KEY_UP_PIN = 19
-KEY_DOWN_PIN = 6
-KEY_LEFT_PIN = 5
-KEY_RIGHT_PIN = 26
-KEY_PRESS_PIN = 13
-KEY1_PIN = 21
-KEY2_PIN = 20
-KEY3_PIN = 16
-LEFT = True
-RIGHT = False
 
 
 
@@ -73,24 +63,21 @@ class usbMidiHost():
 
 
 class usbMidiHostUi():
-    buttons = [{'points': [(127, 20), (90, 40)], 'key': KEY1_PIN, 'text': 'in'},
-               {'points': [(127, 50), (90, 70)], 'key': KEY2_PIN, 'text': 'out'},
-               {'points': [(127, 80), (90, 100)], 'key': KEY3_PIN, 'text': 'sys'}]
     # devices
     connectedDevices = []
     currentDeviceLeft = 0
     currentDeviceRight = 0
-    currentSide = LEFT
+    currentSide = True  # Left: True, Right: False
     # info
     currentInfo = 0
-    pins = [KEY_UP_PIN,
-            KEY_DOWN_PIN,
-            KEY_LEFT_PIN,
-            KEY_RIGHT_PIN,
-            KEY_PRESS_PIN,
-            KEY1_PIN,
-            KEY2_PIN,
-            KEY3_PIN]
+    pins = {'up': 19,
+            'down': 6,
+            'left': 5,
+            'right': 26,
+            'press': 13,
+            '1': 21,
+            '2': 20,
+            '3': 16}
 
     def __init__(self):
         self.usbMidiHost = usbMidiHost()
@@ -103,7 +90,7 @@ class usbMidiHostUi():
                       'creator: lukn303']
         # init GPIO
         GPIO.setmode(GPIO.BCM)
-        for pin in self.pins:
+        for pin in self.pins.values():
             GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
             GPIO.add_event_detect(pin, GPIO.FALLING,
                                   callback=self.pinHandler,
@@ -128,28 +115,28 @@ class usbMidiHostUi():
         self.disp.LCD_ShowImage(self.image, 0, 0)
 
     def pinHandler(self, pin):
-        if pin == KEY_DOWN_PIN:
+        if pin == self.pins['down']:
             print("up")
-            if self.currentSide == LEFT:
+            if self.currentSide:
                 self.currentDeviceLeft = self.decrease(self.currentDeviceLeft, len(self.usbMidiHost.getDeviceList()) - 1)
             else:
                 self.currentDeviceRight = self.decrease(self.currentDeviceRight, len(self.usbMidiHost.getDeviceList()) - 1)
-        if pin == KEY_UP_PIN:
+        if pin == self.pins['up']:
             print("down")
-            if self.currentSide == LEFT:
+            if self.currentSide:
                 self.currentDeviceLeft = self.increase(self.currentDeviceLeft, len(self.usbMidiHost.getDeviceList()))
             else:
                 self.currentDeviceRight = self.increase(self.currentDeviceRight, len(self.usbMidiHost.getDeviceList()))
 
-        if pin in [KEY_LEFT_PIN, KEY_RIGHT_PIN, KEY_PRESS_PIN]:
+        if pin in [self.pins['left'], self.pins['right'], self.pins['press']]:
             self.currentSide = not self.currentSide
 
         # Key1: switch informations
-        if pin == KEY1_PIN:
+        if pin == self.pins['1']:
             print("Key1")
             self.currentInfo = self.currentInfo + 1 if self.currentInfo < len(self.infos) - 1 else 0
         # Key2: toggle connection between selected devices
-        if pin == KEY2_PIN:
+        if pin == self.pins['2']:
             print("Key2")
             if self.currentDeviceLeft == self.currentDeviceRight:
                 self.statusMessage("cannot connect to itself")
@@ -166,7 +153,7 @@ class usbMidiHostUi():
                 self.connectedDevices.append({'in': self.currentDeviceLeft, 'out': self.currentDeviceRight})
                 self.statusMessage(f"connected({self.currentDeviceLeft},{self.currentDeviceRight})")
         # Key3: Disconnect Currently selected devices
-        if pin == KEY3_PIN:
+        if pin == self.pins['3']:
             print("Key2")
             self.statusMessage("no function yet")
 
@@ -246,7 +233,7 @@ class usbMidiHostUi():
         # draw cursor line with a dot on the current Side
         p1 = (40, (self.currentDeviceLeft + 1) * 20 + 10)
         p2 = (87, (self.currentDeviceRight + 1) * 20 + 10)
-        if self.currentSide == LEFT:
+        if self.currentSide:
             self.draw.ellipse((p1[0], p1[1] - 3, p1[0] + 6, p1[1] + 3), fill='white', outline='white')
         else:
             self.draw.ellipse((p2[0] - 6, p2[1] - 3, p2[0], p2[1] + 3), fill='white', outline='white')
